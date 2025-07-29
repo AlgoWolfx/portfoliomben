@@ -7,6 +7,7 @@ import { adminLoginSchema } from '../../utils/validation';
 import { useRateLimit } from '../../hooks/useRateLimit';
 import { updateLastActivity, getSafeErrorMessage } from '../../lib/security';
 import AdminMetaTags from '../../components/AdminMetaTags';
+import { ADMIN_URLS } from '../../lib/constants';
 
 type LoginFormValues = {
   email: string;
@@ -39,7 +40,7 @@ const AdminLogin = () => {
     const checkSession = async () => {
       const { data } = await getSession();
       if (data.session) {
-        navigate('/__q7r5t9m2v4b1');
+        navigate(ADMIN_URLS.DASHBOARD);
       }
     };
 
@@ -73,7 +74,7 @@ const AdminLogin = () => {
         
 
         
-        navigate('/__q7r5t9m2v4b1');
+        navigate(ADMIN_URLS.DASHBOARD);
       }
           } catch (err) {
         recordFailedAttempt();

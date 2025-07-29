@@ -4,6 +4,7 @@ import { getCurrentUser, signOut } from '../lib/supabase';
 import { LogOut, Home, User, FileText, Briefcase, MessageSquare, Info, Phone } from 'lucide-react';
 import { checkSessionTimeout, updateLastActivity, secureLogout } from '../lib/security';
 import AdminMetaTags from './AdminMetaTags';
+import { ADMIN_URLS } from '../lib/constants';
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -17,14 +18,14 @@ const AdminLayout = () => {
       // Session timeout kontrolü
       if (checkSessionTimeout()) {
         await secureLogout();
-        navigate('/__q7r5t9m2v4b1/login');
+        navigate(ADMIN_URLS.LOGIN);
         return;
       }
 
       const { data, error } = await getCurrentUser();
       
       if (error || !data.user) {
-        navigate('/__q7r5t9m2v4b1/login');
+        navigate(ADMIN_URLS.LOGIN);
         return;
       }
       
@@ -44,7 +45,7 @@ const AdminLayout = () => {
         setShowTimeoutWarning(true);
         setTimeout(async () => {
           secureLogout();
-          navigate('/__q7r5t9m2v4b1/login');
+          navigate(ADMIN_URLS.LOGIN);
         }, 30000); // 30 saniye uyarı
       }
     }, 5 * 60 * 1000); // 5 dakika
@@ -72,7 +73,7 @@ const AdminLayout = () => {
   const handleLogout = async () => {
     await secureLogout();
     await signOut();
-    navigate('/__q7r5t9m2v4b1/login');
+    navigate(ADMIN_URLS.LOGIN);
   };
 
   if (loading) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getSession } from '../lib/supabase';
 import { checkSessionTimeout, updateLastActivity } from '../lib/security';
+import { ADMIN_URLS } from '../lib/constants';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -57,11 +58,11 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   if (!isAuthenticated) {
     // Admin sayfaları için gizli URL'e yönlendir
     if (adminOnly) {
-      return <Navigate to="/__q7r5t9m2v4b1/login" replace />;
+      return <Navigate to={ADMIN_URLS.LOGIN} replace />;
     }
     
     // Genel admin login sayfasına yönlendir
-    return <Navigate to="/__q7r5t9m2v4b1/login" replace />;
+    return <Navigate to={ADMIN_URLS.LOGIN} replace />;
   }
 
   // Authenticated ise children'ı render et

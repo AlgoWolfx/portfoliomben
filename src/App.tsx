@@ -20,6 +20,7 @@ import PublicLayout from './components/PublicLayout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProjectDetail from './pages/ProjectDetail';
+import { ADMIN_URLS } from './lib/constants';
 
 function App() {
   return (
@@ -39,10 +40,10 @@ function App() {
           </Route>
 
           {/* Admin Login - Özel URL'de gizli */}
-          <Route path="/__q7r5t9m2v4b1/login" element={<AdminLogin />} />
+          <Route path={ADMIN_URLS.LOGIN} element={<AdminLogin />} />
           
           {/* Admin Panel - Gizli URL'de korumalı */}
-          <Route path="/__q7r5t9m2v4b1" element={
+          <Route path={ADMIN_URLS.DASHBOARD} element={
             <ProtectedRoute adminOnly={true}>
               <AdminLayout />
             </ProtectedRoute>
