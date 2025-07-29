@@ -1,5 +1,8 @@
 // Admin path environment variable'dan al
-export const ADMIN_PATH = import.meta.env.VITE_ADMIN_SECRET_PATH || '__q7r5t9m2v4b1';
+const envPath = import.meta.env.VITE_ADMIN_SECRET_PATH;
+console.log('VITE_ADMIN_SECRET_PATH:', envPath); // Debug için
+
+export const ADMIN_PATH = envPath || '__q7r5t9m2v4b1';
 
 // Admin URL'leri
 export const ADMIN_URLS = {

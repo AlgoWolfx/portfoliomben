@@ -5,6 +5,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/q7r5t9m2v4b1/(.*)",
+      "destination": "/__q7r5t9m2v4b1/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
