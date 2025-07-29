@@ -9,9 +9,15 @@ import { useProfile } from '../lib/hooks/useProfile';
 import { useContactInfo } from '../lib/hooks/useContactInfo';
 
 const contactSchema = z.object({
-        name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
-      email: z.string().email({ message: 'Please enter a valid email address' }),
-      message: z.string().min(10, { message: 'Message must be at least 10 characters' }),
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  email: z.string()
+    .email({ message: 'Please enter a valid email address' })
+    .refine((email) => {
+      const localPart = email.split('@')[0];
+      const turkishChars = /[çğıöşüÇĞIİÖŞÜ]/;
+      return !turkishChars.test(localPart);
+    }, { message: 'Email address cannot contain Turkish characters' }),
+  message: z.string().min(10, { message: 'Message must be at least 10 characters' }),
 });
 
 type ContactFormValues = z.infer<typeof contactSchema>;
@@ -326,10 +332,11 @@ const Contact: React.FC = () => {
                   </label>
                   <input
                     id="email"
-                    type="email"
+                    type="text"
                     {...register('email')}
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your email"
+                    autoComplete="email"
                   />
                   {errors.email && (
                     <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>

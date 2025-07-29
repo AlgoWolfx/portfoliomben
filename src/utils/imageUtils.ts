@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { useState } from 'react';
 
 export const IMAGE_SIZES = {
   cover: {
@@ -114,4 +115,69 @@ export const deleteImage = async (url: string, bucket: string = 'blog-images') =
     console.error('Error deleting image:', error);
     throw error;
   }
+};
+
+// Image optimization utilities for mobile performance
+
+export const optimizeImageUrl = (url: string, width: number = 800): string => {
+  if (!url) return '';
+  
+  // Supabase Storage URL'lerini optimize et
+  if (url.includes('supabase.co')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?width=${width}&quality=80&format=webp`;
+  }
+  
+  return url;
+};
+
+export const getResponsiveImageUrl = (url: string): {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+} => {
+  if (!url) return { mobile: '', tablet: '', desktop: '' };
+  
+  const baseUrl = url.split('?')[0];
+  
+  return {
+    mobile: `${baseUrl}?width=400&quality=70&format=webp`,
+    tablet: `${baseUrl}?width=600&quality=75&format=webp`,
+    desktop: `${baseUrl}?width=800&quality=80&format=webp`
+  };
+};
+
+export const preloadImage = (src: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => reject();
+    img.src = src;
+  });
+};
+
+export const lazyLoadImage = (src: string, placeholder: string = ''): string => {
+  // Intersection Observer ile lazy loading için data-src attribute'u
+  return placeholder || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyIi8+PC9zdmc+';
+};
+
+// Image loading state management
+export const useImageLoader = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  const loadImage = async (src: string) => {
+    setIsLoading(true);
+    setHasError(false);
+    
+    try {
+      await preloadImage(src);
+      setIsLoading(false);
+    } catch {
+      setHasError(true);
+      setIsLoading(false);
+    }
+  };
+
+  return { isLoading, hasError, loadImage };
 }; 

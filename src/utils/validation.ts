@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { sanitizeInput, sanitizeForXSS, sanitizeHTMLContent } from '../lib/security';
+import { sanitizeInput, sanitizeHTMLContent } from '../lib/security';
 
 // Temel input validation şemaları
 export const emailSchema = z
   .string()
-  .email('Geçerli bir e-posta adresi giriniz')
-  .min(1, 'E-posta adresi gereklidir')
-  .max(255, 'E-posta adresi çok uzun')
+  .email('Please enter a valid email address')
+  .min(1, 'Email is required')
+  .max(255, 'Email is too long')
   .transform((val) => sanitizeInput(val));
 
 export const passwordSchema = z
@@ -81,9 +81,9 @@ export const profileFormSchema = z.object({
 
 // İletişim form şeması
 export const contactFormSchema = z.object({
-  name: z.string().min(1, 'İsim gereklidir').max(100, 'İsim çok uzun'),
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   email: emailSchema,
-  message: z.string().min(10, 'Mesaj en az 10 karakter olmalıdır').max(1000, 'Mesaj çok uzun'),
+  message: z.string().min(10, 'Message must be at least 10 characters').max(1000, 'Message is too long'),
 });
 
 // Dosya upload validation
@@ -130,7 +130,7 @@ export const validateForm = <T>(schema: z.ZodSchema<T>, data: unknown): { succes
     return { success: true, data: validatedData };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errors = error.errors.map(err => err.message);
+      const errors = error.issues.map((err: z.ZodIssue) => err.message);
       return { success: false, errors };
     }
     return { success: false, errors: ['Bilinmeyen bir hata oluştu'] };
