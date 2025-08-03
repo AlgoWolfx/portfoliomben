@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { HelmetProvider } from 'react-helmet-async';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, memo } from 'react';
 import { injectSpeedInsights } from '@vercel/speed-insights';
 import PublicLayout from './components/PublicLayout';
 import AdminLayout from './components/AdminLayout';
@@ -26,18 +26,53 @@ const AdminMessages = lazy(() => import('./pages/admin/AdminMessages'));
 const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 
-// Loading component
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen bg-black">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-400"></div>
+// Optimized loading component
+const LoadingSpinner = memo(() => (
+  <div 
+    className="flex items-center justify-center min-h-screen bg-black"
+    style={{
+      willChange: 'auto',
+      containIntrinsicSize: '100vw 100vh'
+    }}
+  >
+    <div 
+      className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-400"
+      style={{
+        willChange: 'transform',
+        transform: 'translateZ(0)'
+      }}
+    />
   </div>
-);
+));
+
+LoadingSpinner.displayName = 'LoadingSpinner';
+
+// Speed Insights wrapper - memoized
+const SpeedInsightsWrapper = memo(() => {
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+    return <>{injectSpeedInsights()}</>;
+  }
+  return null;
+});
+
+SpeedInsightsWrapper.displayName = 'SpeedInsightsWrapper';
 
 function App() {
   return (
     <HelmetProvider>
       <div className="dark">
-        <Toaster richColors position="top-right" theme="dark" />
+        <Toaster 
+          richColors 
+          position="top-right" 
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: 'rgb(17 24 39)',
+              border: '1px solid rgb(55 65 81)',
+              color: 'rgb(243 244 246)'
+            }
+          }}
+        />
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             {/* Public Routes */}
@@ -70,8 +105,8 @@ function App() {
           </Routes>
         </Suspense>
         
-        {/* Vercel Speed Insights - Sadece test amaçlı */}
-        {injectSpeedInsights()}
+        {/* Vercel Speed Insights - Optimized */}
+        <SpeedInsightsWrapper />
       </div>
     </HelmetProvider>
   );

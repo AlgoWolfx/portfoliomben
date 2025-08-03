@@ -117,43 +117,96 @@ export const deleteImage = async (url: string, bucket: string = 'blog-images') =
   }
 };
 
-// Image optimization utilities for mobile performance
+// Image optimization utilities for better performance
 
-export const optimizeImageUrl = (url: string, width: number = 800): string => {
-  if (!url) return '';
-  
-  // Supabase Storage URL'lerini optimize et
-  if (url.includes('supabase.co')) {
-    const baseUrl = url.split('?')[0];
-    return `${baseUrl}?width=${width}&quality=80&format=webp`;
-  }
-  
-  return url;
-};
-
-export const getResponsiveImageUrl = (url: string): {
+interface ImageSizes {
   mobile: string;
   tablet: string;
   desktop: string;
-} => {
-  if (!url) return { mobile: '', tablet: '', desktop: '' };
+}
+
+// Supabase resim URL'sini responsive boyutlara göre optimize et
+export const getResponsiveImageUrl = (
+  originalUrl: string, 
+  targetSize: number = 300
+): string => {
+  if (!originalUrl) return '';
   
-  const baseUrl = url.split('?')[0];
+  // Supabase storage URL kontrolü
+  if (originalUrl.includes('supabase')) {
+    // Supabase transform API kullanarak optimize et
+    const baseUrl = originalUrl.split('?')[0]; // Query parametrelerini temizle
+    return `${baseUrl}?width=${targetSize}&height=${targetSize}&resize=cover&quality=80`;
+  }
   
+  // Diğer URL'ler için orijinali döndür
+  return originalUrl;
+};
+
+// Responsive image sizes seti
+export const getResponsiveImageSizes = (originalUrl: string): ImageSizes => {
   return {
-    mobile: `${baseUrl}?width=400&quality=70&format=webp`,
-    tablet: `${baseUrl}?width=600&quality=75&format=webp`,
-    desktop: `${baseUrl}?width=800&quality=80&format=webp`
+    mobile: getResponsiveImageUrl(originalUrl, 200),
+    tablet: getResponsiveImageUrl(originalUrl, 300),
+    desktop: getResponsiveImageUrl(originalUrl, 400)
   };
 };
 
+// Lazy loading için intersection observer hook
+export const createImageObserver = (
+  callback: (entries: IntersectionObserverEntry[]) => void
+): IntersectionObserver => {
+  return new IntersectionObserver(callback, {
+    rootMargin: '50px', // 50px önceden yükle
+    threshold: 0.1
+  });
+};
+
+// WebP desteği kontrolü
+export const supportsWebP = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  
+  return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+};
+
+// Image preload function
 export const preloadImage = (src: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve();
-    img.onerror = () => reject();
+    img.onerror = reject;
     img.src = src;
   });
+};
+
+// Optimize image loading for components
+export const getOptimizedImageProps = (
+  src: string,
+  alt: string,
+  size: 'small' | 'medium' | 'large' = 'medium'
+) => {
+  const sizeMap = {
+    small: 200,
+    medium: 300,
+    large: 400
+  };
+  
+  const optimizedSrc = getResponsiveImageUrl(src, sizeMap[size]);
+  
+  return {
+    src: optimizedSrc,
+    alt,
+    loading: 'lazy' as const,
+    decoding: 'async' as const,
+    style: {
+      contentVisibility: 'auto' as const,
+      containIntrinsicSize: `${sizeMap[size]}px ${sizeMap[size]}px`
+    }
+  };
 };
 
 export const lazyLoadImage = (src: string, placeholder: string = ''): string => {

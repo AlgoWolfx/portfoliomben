@@ -1,80 +1,135 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, ArrowRight } from 'lucide-react';
-
-interface BlogPost {
-  id: number;
-  title: string;
-  description: string;
-  slug: string;
-  image_url?: string | null;
-  created_at: string;
-}
+import { Calendar, User, Eye } from 'lucide-react';
+import { getOptimizedImageProps } from '../utils/imageUtils';
 
 interface BlogCardProps {
-  post: BlogPost;
-  index: number;
-  onReadMore: (postId: number) => void;
+  id: string;
+  title: string;
+  excerpt: string;
+  author: string;
+  date: string;
+  views: number;
+  featured_image?: string;
+  slug: string;
+  onClick: (slug: string) => void;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, index, onReadMore }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+// Mobil cihaz kontrolü
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+
+const BlogCard: React.FC<BlogCardProps> = React.memo(({
+  title,
+  excerpt,
+  author,
+  date,
+  views,
+  featured_image,
+  slug,
+  onClick
+}) => {
+  // Mobil optimizasyonları
+  const mobile = useMemo(() => isMobile(), []);
+  
+  // Optimized image props
+  const imageProps = useMemo(() => {
+    if (!featured_image) return null;
+    return getOptimizedImageProps(featured_image, title, 'medium');
+  }, [featured_image, title]);
+
+  // Animasyon konfigürasyonu - mobile için optimize edilmiş
+  const animationConfig = useMemo(() => ({
+    whileHover: mobile ? {} : { y: -5, scale: 1.02 },
+    whileTap: { scale: 0.98 },
+    transition: { duration: mobile ? 0.1 : 0.2 }
+  }), [mobile]);
+
+  // Date formatting
+  const formattedDate = useMemo(() => {
+    return new Date(date).toLocaleDateString('tr-TR');
+  }, [date]);
+
+  // Handle click
+  const handleClick = () => {
+    onClick(slug);
   };
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="bg-gray-900/50 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 group"
-      whileHover={{ y: -3 }}
+      className="bg-gray-900 rounded-lg overflow-hidden border border-gray-700 cursor-pointer group"
+      onClick={handleClick}
+      {...animationConfig}
+      style={{
+        willChange: mobile ? 'transform' : 'transform, box-shadow',
+        transform: 'translateZ(0)'
+      }}
     >
-      {post.image_url && (
-        <div className="w-full h-48 overflow-hidden">
-          <img 
-            src={post.image_url} 
-            alt={post.title}
+      {/* Featured Image */}
+      {imageProps && (
+        <div className="relative h-48 overflow-hidden">
+          <img
+            {...imageProps}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              console.error(`Image failed to load: ${post.image_url}`);
-              (e.target as HTMLImageElement).style.display = 'none';
+            style={{
+              ...imageProps.style,
+              willChange: 'transform',
+              transform: 'translateZ(0)'
             }}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
       )}
-      
-      <div className="p-6">
-        <div className="flex items-center text-gray-400 text-sm mb-3">
-          <Calendar size={16} className="mr-2" />
-          <time dateTime={post.created_at}>{formatDate(post.created_at)}</time>
-        </div>
-        
-        <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-gray-200 transition-colors">
-          {post.title}
-        </h3>
-        
-        <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-          {post.description}
-        </p>
-        
 
-        
+      {/* Content */}
+      <div className="p-6">
+        {/* Title */}
+        <h3 className="text-xl font-semibold text-white mb-3 line-clamp-2 group-hover:text-gray-200 transition-colors">
+          {title}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="text-gray-400 mb-4 line-clamp-3 leading-relaxed">
+          {excerpt}
+        </p>
+
+        {/* Meta Information */}
+        <div className="flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <User size={16} className="mr-1" />
+              <span>{author}</span>
+            </div>
+            <div className="flex items-center">
+              <Calendar size={16} className="mr-1" />
+              <span>{formattedDate}</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center">
+            <Eye size={16} className="mr-1" />
+            <span>{views}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Read More Button */}
+      <div className="px-6 pb-6">
         <motion.button
-          onClick={() => onReadMore(post.id)}
-          className="inline-flex items-center text-gray-400 hover:text-white text-sm font-medium group-hover:text-white transition-colors"
-          whileHover={{ x: 5 }}
+          className="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors"
+          whileHover={mobile ? {} : { x: 5 }}
+          transition={{ duration: 0.1 }}
+          style={{
+            willChange: 'transform, color',
+            transform: 'translateZ(0)'
+          }}
         >
-          Read More
-          <ArrowRight size={16} className="ml-2" />
+          Devamını Oku →
         </motion.button>
       </div>
     </motion.article>
   );
-};
+});
+
+BlogCard.displayName = 'BlogCard';
 
 export default BlogCard;
