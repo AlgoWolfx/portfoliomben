@@ -1,7 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 const FogBackground: React.FC = () => {
+  const { isMobile, shouldReduceMotion } = useMobileOptimization();
+
+  // Disable animations on mobile or when reduce motion is preferred
+  if (isMobile || shouldReduceMotion) {
+    return (
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Static fog layers for mobile */}
+        <div className="absolute inset-0 opacity-20">
+          <div 
+            className="w-full h-full bg-gradient-to-br from-gray-600/20 to-transparent"
+            style={{
+              filter: 'blur(40px)',
+              transform: 'scale(1.2)',
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Fog Layer 1 */}
@@ -48,7 +69,7 @@ const FogBackground: React.FC = () => {
         />
       </motion.div>
 
-      {/* Fog Layer 3 */}
+      {/* Fog Layer 3 - Only on desktop */}
       <motion.div
         className="absolute inset-0 opacity-25"
         animate={{
@@ -70,8 +91,8 @@ const FogBackground: React.FC = () => {
         />
       </motion.div>
 
-      {/* Floating Particles */}
-      {[...Array(15)].map((_, i) => (
+      {/* Floating Particles - Reduced for better performance */}
+      {[...Array(8)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute w-2 h-2 bg-gray-400/20 rounded-full"

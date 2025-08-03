@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 interface Profile {
   name: string;
@@ -23,10 +24,11 @@ interface AboutPage {
   current_focus: string[];
 }
 
-const About = () => {
+const About = memo(() => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [aboutData, setAboutData] = useState<AboutPage | null>(null);
   const [loading, setLoading] = useState(true);
+  const { shouldReduceMotion } = useMobileOptimization();
 
   useEffect(() => {
     fetchData();
@@ -95,9 +97,9 @@ const About = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+          animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          transition={shouldReduceMotion ? {} : { duration: 0.8 }}
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
@@ -111,9 +113,9 @@ const About = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Column - Bio */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            initial={shouldReduceMotion ? {} : { opacity: 0, x: -20 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1, x: 0 }}
+            transition={shouldReduceMotion ? {} : { duration: 0.8, delay: 0.2 }}
             className="space-y-6"
           >
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
@@ -262,6 +264,6 @@ const About = () => {
       </div>
     </div>
   );
-};
+});
 
 export default About;

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import BlogCard from '../components/BlogCard';
 import { supabase } from '../lib/supabase';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 interface BlogPost {
   id: number;
@@ -13,8 +14,9 @@ interface BlogPost {
   created_at: string;
 }
 
-const Blog: React.FC = () => {
+const Blog: React.FC = memo(() => {
   const navigate = useNavigate();
+  const { isMobile, shouldReduceMotion } = useMobileOptimization();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,9 +89,9 @@ const Blog: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+          animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          transition={shouldReduceMotion ? {} : { duration: 0.8 }}
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
@@ -128,9 +130,9 @@ const Blog: React.FC = () => {
 
         {/* Newsletter Signup */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+          animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+          transition={shouldReduceMotion ? {} : { duration: 0.8, delay: 0.6 }}
           className="mt-16 bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800 text-center"
         >
           <h2 className="text-2xl font-semibold text-white mb-4">
@@ -176,6 +178,6 @@ const Blog: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Blog;

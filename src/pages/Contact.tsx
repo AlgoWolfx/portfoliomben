@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import { Mail, Github, Linkedin, Twitter, MapPin, Clock, X } from 'lucide-react'
 import { supabase } from '../lib/supabase';
 import { useProfile } from '../lib/hooks/useProfile';
 import { useContactInfo } from '../lib/hooks/useContactInfo';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 const contactSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -22,13 +23,14 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
-const Contact: React.FC = () => {
+const Contact: React.FC = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const { shouldReduceMotion } = useMobileOptimization();
 
   const { profile, loading: profileLoading } = useProfile();
   const { contactInfo, loading: contactInfoLoading } = useContactInfo();
@@ -385,6 +387,6 @@ const Contact: React.FC = () => {
       </AnimatePresence>
     </div>
   );
-};
+});
 
 export default Contact;

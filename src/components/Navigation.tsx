@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
-const Navigation = () => {
+const Navigation = memo(() => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMobile, shouldReduceMotion } = useMobileOptimization();
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -29,11 +31,21 @@ const Navigation = () => {
   };
 
   // Mobil performans için optimize edilmiş animasyon ayarları
-  const desktopAnimationSettings = {
-    whileHover: { scale: 1.02 },
-    whileTap: { scale: 0.98 },
-    transition: { duration: 0.1 }
-  };
+  const animationSettings = shouldReduceMotion 
+    ? {} 
+    : {
+        whileHover: { scale: 1.02 },
+        whileTap: { scale: 0.98 },
+        transition: { duration: 0.1 }
+      };
+
+  const logoAnimation = shouldReduceMotion
+    ? { initial: {}, animate: {} }
+    : {
+        initial: { opacity: 0, x: -20 },
+        animate: { opacity: 1, x: 0 },
+        transition: { duration: 0.3 }
+      };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
@@ -41,9 +53,7 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo space */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            {...logoAnimation}
             className="w-8 cursor-pointer"
             onClick={() => handleNavClick('/')}
           />
@@ -59,7 +69,7 @@ const Navigation = () => {
                     ? 'text-white border-b-2 border-gray-400'
                     : 'text-gray-300 hover:text-white'
                 }`}
-                {...desktopAnimationSettings}
+                {...animationSettings}
               >
                 {item.name}
               </motion.button>
@@ -120,6 +130,6 @@ const Navigation = () => {
       </div>
     </nav>
   );
-};
+});
 
 export default Navigation;

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { getProjects, type Project } from '@/lib/supabase';
 import { Github, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
-const Projects: React.FC = () => {
+const Projects: React.FC = memo(() => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { shouldReduceMotion } = useMobileOptimization();
 
   useEffect(() => {
     fetchProjects();
@@ -48,8 +50,8 @@ const Projects: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-16">
       <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={shouldReduceMotion ? {} : { opacity: 0, y: -20 }}
+        animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
         className="text-4xl font-bold text-center mb-12"
       >
         My Projects
@@ -59,9 +61,9 @@ const Projects: React.FC = () => {
         {projects.map((project, index) => (
           <motion.div
             key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1, y: 0 }}
+            transition={shouldReduceMotion ? {} : { delay: Math.min(index * 0.1, 0.3) }}
             className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors"
           >
             <Link to={`/projects/${project.id}`} className="block">
@@ -70,6 +72,8 @@ const Projects: React.FC = () => {
                   <img
                     src={project.image_url}
                     alt={project.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                   />
                 </div>
@@ -129,6 +133,6 @@ const Projects: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default Projects;

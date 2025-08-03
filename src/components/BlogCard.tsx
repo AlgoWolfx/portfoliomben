@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, ArrowRight } from 'lucide-react';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
 interface BlogPost {
   id: number;
@@ -17,7 +18,9 @@ interface BlogCardProps {
   onReadMore: (postId: number) => void;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, index, onReadMore }) => {
+const BlogCard: React.FC<BlogCardProps> = memo(({ post, index, onReadMore }) => {
+  const { shouldReduceMotion } = useMobileOptimization();
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -26,19 +29,27 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onReadMore }) => {
     });
   };
 
+  const cardAnimation = shouldReduceMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.6, delay: Math.min(index * 0.1, 0.3) },
+        whileHover: { y: -3 }
+      };
+
   return (
     <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+      {...cardAnimation}
       className="bg-gray-900/50 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 group"
-      whileHover={{ y: -3 }}
     >
       {post.image_url && (
         <div className="w-full h-48 overflow-hidden">
           <img 
             src={post.image_url} 
             alt={post.title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               console.error(`Image failed to load: ${post.image_url}`);
@@ -67,7 +78,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onReadMore }) => {
         <motion.button
           onClick={() => onReadMore(post.id)}
           className="inline-flex items-center text-gray-400 hover:text-white text-sm font-medium group-hover:text-white transition-colors"
-          whileHover={{ x: 5 }}
+          whileHover={shouldReduceMotion ? {} : { x: 5 }}
         >
           Read More
           <ArrowRight size={16} className="ml-2" />
@@ -75,6 +86,8 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onReadMore }) => {
       </div>
     </motion.article>
   );
-};
+});
+
+BlogCard.displayName = 'BlogCard';
 
 export default BlogCard;
