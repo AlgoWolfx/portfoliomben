@@ -58,6 +58,54 @@
   }
 }
 
+/* GPU Performance Optimizations */
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-opacity {
+    will-change: opacity;
+  }
+  
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  /* Optimize transitions */
+  .transition-gpu {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+    will-change: transform, opacity;
+  }
+  
+  /* Mobile-optimized animations */
+  @media (max-width: 768px) {
+    * {
+      animation-duration: 0.3s !important;
+      animation-delay: 0s !important;
+    }
+    
+    .motion-reduce:motion-safe {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
 /* TipTap Styles */
 .ProseMirror {
   @apply min-h-[200px] p-4 focus:outline-none;

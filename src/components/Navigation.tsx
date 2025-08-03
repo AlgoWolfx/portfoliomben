@@ -1,39 +1,44 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
 
-const Navigation = () => {
+const Navigation = React.memo(() => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Projects', path: '/projects' },
     { name: 'Blog', path: '/blog' },
     { name: 'Contact', path: '/contact' },
-  ];
+  ], []);
 
-  const handleNavClick = (path: string) => {
+  const handleNavClick = useCallback((path: string) => {
     navigate(path);
     setIsMobileMenuOpen(false);
-  };
+  }, [navigate]);
 
-  const isCurrentPath = (path: string) => {
+  const isCurrentPath = useCallback((path: string) => {
     if (path === '/') {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(path);
-  };
+  }, [location.pathname]);
 
   // Mobil performans için optimize edilmiş animasyon ayarları
-  const desktopAnimationSettings = {
+  const desktopAnimationSettings = useMemo(() => ({
     whileHover: { scale: 1.02 },
     whileTap: { scale: 0.98 },
     transition: { duration: 0.1 }
-  };
+  }), []);
+
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(prev => !prev);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
@@ -69,7 +74,7 @@ const Navigation = () => {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <motion.button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={toggleMobileMenu}
               className="text-gray-300 hover:text-white p-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -120,6 +125,8 @@ const Navigation = () => {
       </div>
     </nav>
   );
-};
+});
+
+Navigation.displayName = 'Navigation';
 
 export default Navigation;

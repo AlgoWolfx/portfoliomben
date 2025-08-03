@@ -1,40 +1,89 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const { blackA, mauve, violet, indigo, purple } = require('@radix-ui/colors');
+
+export default {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  prefix: "",
-  // Mobil performans için purge ayarları
-  purge: {
-    enabled: process.env.NODE_ENV === 'production',
-    content: [
-      './src/**/*.{ts,tsx}',
-      './public/index.html',
-    ],
-    options: {
-      safelist: [
-        // Animasyon sınıfları
-        'animate-spin',
-        'animate-pulse',
-        // Framer Motion sınıfları
-        'motion-safe:animate-spin',
-        'motion-reduce:animate-none',
-      ],
-    },
-  },
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
+      animation: {
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'gradient': 'gradient 15s ease infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+        'slide-up': 'slideUp 0.5s ease-out',
+        'slide-down': 'slideDown 0.5s ease-out',
+        'slide-in-right': 'slideInRight 0.5s ease-out',
+        'slide-in-left': 'slideInLeft 0.5s ease-out',
+        'scale-in': 'scaleIn 0.3s ease-out',
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'spin-slow': 'spin 3s linear infinite',
+        // GPU optimized animations
+        'float-gpu': 'float-gpu 6s ease-in-out infinite',
+        'pulse-gpu': 'pulse-gpu 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        gradient: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center'
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center'
+          }
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 5px rgb(59, 130, 246), 0 0 10px rgb(59, 130, 246)' },
+          '100%': { boxShadow: '0 0 20px rgb(59, 130, 246), 0 0 30px rgb(59, 130, 246)' }
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        },
+        slideDown: {
+          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        },
+        slideInRight: {
+          '0%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' }
+        },
+        slideInLeft: {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' }
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.9)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' }
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        // GPU optimized keyframes
+        'float-gpu': {
+          '0%, 100%': { transform: 'translate3d(0, 0, 0)' },
+          '50%': { transform: 'translate3d(0, -20px, 0)' },
+        },
+        'pulse-gpu': {
+          '0%, 100%': { 
+            opacity: '1',
+            transform: 'scale3d(1, 1, 1)'
+          },
+          '50%': { 
+            opacity: '.5',
+            transform: 'scale3d(0.95, 0.95, 0.95)'
+          },
+        },
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -75,32 +124,6 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-        // Mobil performans için optimize edilmiş animasyonlar
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        "slide-up": {
-          "0%": { transform: "translateY(20px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        // Mobil performans için optimize edilmiş animasyonlar
-        "fade-in": "fade-in 0.3s ease-out",
-        "slide-up": "slide-up 0.4s ease-out",
-      },
       typography: {
         DEFAULT: {
           css: {
@@ -126,10 +149,7 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require("tailwindcss-animate"), require('@tailwindcss/typography')],
   // Mobil performans için ek ayarlar
   corePlugins: {
     // Mobilde gereksiz olan özellikleri kapat

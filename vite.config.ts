@@ -14,6 +14,13 @@ export default defineConfig({
     // Production güvenliği
     sourcemap: false, // Source map'leri kapat
     minify: 'terser', // Terser ile minify
+    terserOptions: {
+      compress: {
+        drop_console: true, // Production'da console.log'ları kaldır
+        drop_debugger: true, // Debugger'ları kaldır
+        pure_funcs: ['console.log', 'console.error', 'console.warn', 'console.debug'],
+      },
+    },
     rollupOptions: {
       output: {
         // Console.log'ları kaldır
@@ -21,11 +28,11 @@ export default defineConfig({
           // Vendor chunk'ları ayır
           vendor: ['react', 'react-dom'],
           // UI kütüphaneleri
-          ui: ['framer-motion', 'lucide-react', '@radix-ui/react-icons'],
+          ui: ['framer-motion', 'lucide-react'],
           // Form kütüphaneleri
           forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-          // Editor kütüphaneleri
-          editor: ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-color', '@tiptap/extension-heading', '@tiptap/extension-highlight', '@tiptap/extension-image', '@tiptap/extension-link', '@tiptap/extension-placeholder', '@tiptap/extension-text-align', '@tiptap/extension-text-style', '@tiptap/extension-underline'],
+          // Editor kütüphaneleri - sadece admin panelinde kullanılıyor
+          editor: ['@tiptap/react', '@tiptap/starter-kit'],
           // Supabase
           supabase: ['@supabase/supabase-js'],
         },

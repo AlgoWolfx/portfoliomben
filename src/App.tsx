@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense } from 'react';
-import { injectSpeedInsights } from '@vercel/speed-insights';
 import PublicLayout from './components/PublicLayout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -34,6 +33,13 @@ const LoadingSpinner = () => (
 );
 
 function App() {
+  // Vercel Speed Insights'ı production'da etkinleştir
+  if (import.meta.env.PROD && import.meta.env.VITE_ENABLE_ANALYTICS === 'true') {
+    import('@vercel/speed-insights').then(({ injectSpeedInsights }) => {
+      injectSpeedInsights();
+    });
+  }
+
   return (
     <HelmetProvider>
       <div className="dark">
@@ -69,9 +75,6 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-        
-        {/* Vercel Speed Insights - Sadece test amaçlı */}
-        {injectSpeedInsights()}
       </div>
     </HelmetProvider>
   );
