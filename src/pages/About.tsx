@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+
+// Mobil kontrolü için yardımcı fonksiyon
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 
 interface Profile {
   name: string;
@@ -25,8 +28,21 @@ interface AboutPage {
 
 const About = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [aboutData, setAboutData] = useState<AboutPage | null>(null);
+  const [aboutContent, setAboutContent] = useState<AboutPage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mobile, setMobile] = useState(false);
+
+  // Mobil kontrolü
+  useEffect(() => {
+    const checkMobile = () => {
+      setMobile(isMobile());
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true } as AddEventListenerOptions);
+    
+    return () => window.removeEventListener('resize', checkMobile as EventListener);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -34,7 +50,6 @@ const About = () => {
 
   const fetchData = async () => {
     try {
-      // Profil bilgilerini al
       const { data: profileData, error: profileError } = await supabase
         .from('profile')
         .select('name, title, about, avatar_url, skills, social_links, email')
@@ -42,24 +57,30 @@ const About = () => {
 
       if (profileError) throw profileError;
 
-      // About sayfası verilerini al
-      const { data: aboutData, error: aboutError } = await supabase
+      const { data: aboutData } = await supabase
         .from('about_page')
         .select('story, philosophy, current_focus')
+        .eq('id', 1)
         .single();
 
-      if (aboutError) {
-        // About sayfası verisi yoksa, profil verisinden oluştur
-        setAboutData({
+      setProfile(profileData);
+
+      if (aboutData) {
+        const currentFocusArray = Array.isArray(aboutData.current_focus) 
+          ? aboutData.current_focus 
+          : [];
+        
+        setAboutContent({
+          ...aboutData,
+          current_focus: currentFocusArray
+        });
+      } else {
+        setAboutContent({
           story: profileData.about || 'Henüz hikaye eklenmedi.',
           philosophy: 'Kaliteli ve kullanıcı dostu yazılımlar geliştirmek.',
           current_focus: profileData.skills || []
         });
-      } else {
-        setAboutData(aboutData);
       }
-
-      setProfile(profileData);
     } catch {
       // Veriler alınırken hata oluştu
     } finally {
@@ -67,10 +88,71 @@ const About = () => {
     }
   };
 
+  // Mobilde animasyonları kapat
+  const animationProps = useMemo(() => {
+    if (mobile) {
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        transition: { duration: 0 }
+      };
+    }
+    return {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.8 }
+    };
+  }, [mobile]);
+
+  const leftColumnAnimation = useMemo(() => {
+    if (mobile) {
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        transition: { duration: 0 }
+      };
+    }
+    return {
+      initial: { opacity: 0, x: -20 },
+      animate: { opacity: 1, x: 0 },
+      transition: { duration: 0.8, delay: 0.2 }
+    };
+  }, [mobile]);
+
+  const rightColumnAnimation = useMemo(() => {
+    if (mobile) {
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        transition: { duration: 0 }
+      };
+    }
+    return {
+      initial: { opacity: 0, x: 20 },
+      animate: { opacity: 1, x: 0 },
+      transition: { duration: 0.8, delay: 0.4 }
+    };
+  }, [mobile]);
+
+  const skillAnimation = useMemo(() => {
+    if (mobile) {
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        transition: { duration: 0 }
+      };
+    }
+    return {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.5, delay: 0.6 }
+    };
+  }, [mobile]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        <div className="text-white">Yükleniyor...</div>
       </div>
     );
   }
@@ -83,21 +165,12 @@ const About = () => {
     );
   }
 
-  // Eğer aboutData yoksa, profil verisinden oluştur
-  const aboutContent = aboutData || {
-    story: profile.about || 'Henüz hikaye eklenmedi.',
-    philosophy: 'Kaliteli ve kullanıcı dostu yazılımlar geliştirmek.',
-    current_focus: profile.skills || []
-  };
-
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          {...animationProps}
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
@@ -111,22 +184,20 @@ const About = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Column - Bio */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            {...leftColumnAnimation}
             className="space-y-6"
           >
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-4">My Story</h2>
               <p className="text-gray-300 leading-relaxed">
-                {aboutContent.story}
+                {aboutContent?.story || 'Henüz hikaye eklenmedi.'}
               </p>
             </div>
 
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-4">Philosophy</h2>
               <p className="text-gray-300 leading-relaxed">
-                {aboutContent.philosophy}
+                {aboutContent?.philosophy || 'Kaliteli ve kullanıcı dostu yazılımlar geliştirmek.'}
               </p>
             </div>
 
@@ -149,9 +220,7 @@ const About = () => {
 
           {/* Right Column - Skills & Image */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            {...rightColumnAnimation}
             className="space-y-8"
           >
             {/* Profile Image */}
@@ -162,6 +231,7 @@ const About = () => {
                     src={profile.avatar_url}
                     alt={profile.name}
                     className="w-full h-full object-cover"
+                    fetchPriority={mobile ? 'high' : undefined}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-600 text-4xl font-bold">
@@ -231,12 +301,10 @@ const About = () => {
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-6">Core Skills</h2>
               <div className="grid grid-cols-2 gap-3">
-                {profile.skills.map((skill, index) => (
+                {profile.skills.map((skill) => (
                   <motion.div
                     key={skill}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.6 + (index * 0.1) }}
+                    {...skillAnimation}
                     className="bg-gray-800 px-4 py-2 rounded-lg text-center border border-gray-700"
                   >
                     <span className="text-gray-300 text-sm font-medium">{skill}</span>
@@ -249,8 +317,8 @@ const About = () => {
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-4">Current Focus</h2>
               <ul className="space-y-3 text-gray-300">
-                {aboutContent.current_focus.map((focus, index) => (
-                  <li key={index} className="flex items-start">
+                {aboutContent?.current_focus?.map((focus) => (
+                  <li key={focus} className="flex items-start">
                     <span className="w-2 h-2 bg-gray-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                     {focus}
                   </li>

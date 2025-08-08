@@ -1,7 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 const FogBackground: React.FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true } as AddEventListenerOptions);
+    return () => window.removeEventListener('resize', checkMobile as EventListener);
+  }, []);
+
+  // Mobilde ağır animasyonları kapatıp statik, hafif bir arka plan göster
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div
+          className="absolute inset-0 opacity-25"
+          style={{
+            filter: 'blur(40px)',
+            transform: 'scale(1.2)'
+          }}
+        >
+          <div className="w-full h-full bg-gradient-to-br from-gray-600/20 to-transparent" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Fog Layer 1 */}
@@ -70,8 +96,8 @@ const FogBackground: React.FC = () => {
         />
       </motion.div>
 
-      {/* Floating Particles */}
-      {[...Array(15)].map((_, i) => (
+      {/* Floating Particles - Azaltıldı */}
+      {[...Array(8)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute w-2 h-2 bg-gray-400/20 rounded-full"

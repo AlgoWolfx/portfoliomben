@@ -1,13 +1,8 @@
 User-agent: *
-Disallow: /__q7r5t9m2v4b1
-Disallow: /__q7r5t9m2v4b1/
-Disallow: /__q7r5t9m2v4b1/*
-Disallow: /admin/projects
-Disallow: /admin/blog
-Disallow: /admin/about
-Disallow: /admin/profile
-Disallow: /admin/messages
-Disallow: /admin/contact
+Disallow: 
+Disallow: 
+Disallow: 
+Disallow: /admin
 
 # Admin paneli ve ilgili tüm sayfaları indeksleme
 # Bu dosya arama motorlarının admin sayfalarını bulmasını engeller

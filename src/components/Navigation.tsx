@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  React.useEffect(() => {
+    const check = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check, { passive: true } as AddEventListenerOptions);
+    return () => window.removeEventListener('resize', check as EventListener);
+  }, []);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -36,7 +43,7 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 sm:backdrop-blur-md border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo space */}
@@ -84,11 +91,12 @@ const Navigation = () => {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden bg-black/95"
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="md:hidden bg-black/95 transform-gpu"
+              style={isMobile ? ({ willChange: 'transform, opacity' } as React.CSSProperties) : undefined}
             >
               <div className="px-2 pt-2 pb-3 space-y-1">
                 {navItems.map((item, index) => (
@@ -100,11 +108,11 @@ const Navigation = () => {
                         ? 'text-white bg-gray-800'
                         : 'text-gray-300 hover:text-white hover:bg-gray-800'
                     }`}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ 
                       duration: 0.2, 
-                      delay: index * 0.05,
+                      delay: isMobile ? 0 : index * 0.05,
                       ease: "easeOut"
                     }}
                     whileHover={{ x: 5 }}

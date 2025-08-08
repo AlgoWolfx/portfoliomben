@@ -39,6 +39,9 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, index, onReadMore }) => {
           <img 
             src={post.image_url} 
             alt={post.title}
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
               console.error(`Image failed to load: ${post.image_url}`);

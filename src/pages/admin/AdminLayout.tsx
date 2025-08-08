@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
-import { getCurrentUser, signOut } from '../../lib/supabase';
 import { LogOut, Home, User, FileText, Briefcase, MessageSquare, Info, Phone } from 'lucide-react';
+import { getCurrentUser, signOut } from '../../lib/supabase';
+import { checkSessionTimeout, updateLastActivity, secureLogout } from '../../lib/security';
+import AdminMetaTags from '../../components/AdminMetaTags';
+import { ADMIN_URLS } from '../../lib/constants';
 
 const AdminLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -13,7 +16,7 @@ const AdminLayout = () => {
       const { data, error } = await getCurrentUser();
       
       if (error || !data.user) {
-        navigate('/admin/login');
+        navigate(ADMIN_URLS.LOGIN);
       }
       
       setLoading(false);
@@ -24,7 +27,7 @@ const AdminLayout = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/admin/login');
+    navigate(ADMIN_URLS.LOGIN);
   };
 
   if (loading) {
@@ -47,7 +50,7 @@ const AdminLayout = () => {
           <ul className="space-y-2">
             <li>
               <Link 
-                to="/admin" 
+                to={ADMIN_URLS.DASHBOARD}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Home size={18} />
@@ -56,7 +59,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/admin/profile" 
+                to={`${ADMIN_URLS.DASHBOARD}/profile`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <User size={18} />
@@ -65,7 +68,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/admin/about" 
+                to={`${ADMIN_URLS.DASHBOARD}/about`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Info size={18} />
@@ -74,7 +77,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/admin/blog" 
+                to={`${ADMIN_URLS.DASHBOARD}/blog`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <FileText size={18} />
@@ -83,7 +86,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/admin/projects" 
+                to={`${ADMIN_URLS.DASHBOARD}/projects`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Briefcase size={18} />
@@ -92,7 +95,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/admin/messages" 
+                to={`${ADMIN_URLS.DASHBOARD}/messages`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <MessageSquare size={18} />
@@ -101,7 +104,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/admin/contact" 
+                to={`${ADMIN_URLS.DASHBOARD}/contact`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Phone size={18} />

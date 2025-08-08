@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, Upload, X, Image as ImageIcon, Edit, Trash2, Eye } from 'lucide-react';
-import ProjectEditor from '@/components/admin/ProjectEditor';
+import BlogEditor from '@/components/admin/BlogEditor';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { uploadImage, IMAGE_SIZES } from '@/utils/imageUtils';
@@ -360,7 +360,7 @@ const AdminBlog: React.FC = () => {
             <label className="block text-sm font-medium text-gray-200 mb-2">
               İçerik
             </label>
-            <ProjectEditor
+            <BlogEditor
               content={blogPost.content}
               onChange={(content) => setBlogPost(prev => ({ ...prev, content }))}
             />

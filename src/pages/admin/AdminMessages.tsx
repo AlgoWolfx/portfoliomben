@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import React, { useState, useEffect } from 'react';
 import { Trash2, Mail, Check } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { Button } from '../../components/ui/button';
+import { toast } from 'sonner';
 
 interface Message {
   id: number;

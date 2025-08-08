@@ -138,3 +138,14 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Lighthouse mobil önerileri: blur ve backdrop-blur mobilde daha hafif */
+@media (max-width: 768px) {
+  /* Büyük paneller için blur yoğunluğunu azalt */
+  .backdrop-blur-sm { backdrop-filter: blur(2px); }
+  .backdrop-blur-md { backdrop-filter: blur(3px); }
+  .backdrop-blur-lg { backdrop-filter: blur(4px); }
+  /* Mobil menü ve overlay'ler için GPU hızlandırma ve will-change */
+  .transform-gpu { transform: translateZ(0); }
+  .will-change-transform { will-change: transform; }
+}

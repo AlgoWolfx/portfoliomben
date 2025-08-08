@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { useContactInfo, ContactInfoData } from '../../lib/hooks/useContactInfo';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Save } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { Button } from '../../components/ui/button';
+import { toast } from 'sonner';
+import { useContactInfo, type ContactInfoData } from '../../lib/hooks/useContactInfo';
 
 const AdminContact = () => {
   const { contactInfo, loading, updateContactInfo } = useContactInfo();

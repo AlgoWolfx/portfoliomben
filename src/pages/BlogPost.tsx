@@ -269,6 +269,8 @@ const BlogPost: React.FC = () => {
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        {/* Content-visibility mobil için */}
+        <style>{`@media (max-width: 768px){ .mobile-content-visibility { content-visibility: auto; contain-intrinsic-size: 1px 1500px; } }`}</style>
         {/* Back Button */}
         <motion.button
           initial={{ opacity: 0, x: -20 }}
@@ -329,6 +331,9 @@ const BlogPost: React.FC = () => {
             <img 
               src={post.image_url} 
               alt={post.title}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               className="w-full h-full object-cover"
             />
           </motion.div>
@@ -339,7 +344,7 @@ const BlogPost: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800"
+          className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800 mobile-content-visibility"
         >
           <div
             className="prose prose-invert prose-lg max-w-none"

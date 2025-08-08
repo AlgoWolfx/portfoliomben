@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getProjectById, type Project } from '@/lib/supabase';
+import { useParams, Link } from 'react-router-dom';
 import { Github, ExternalLink, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { getProjectById, type Project } from '@/lib/supabase';
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -73,6 +72,9 @@ const ProjectDetail: React.FC = () => {
               src={project.image_url}
               alt={project.title}
               className="w-full h-full object-cover"
+              fetchPriority={typeof window !== 'undefined' && window.innerWidth <= 768 ? 'high' : undefined}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         )}

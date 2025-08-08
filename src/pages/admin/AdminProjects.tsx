@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import ProjectEditor from '@/components/admin/ProjectEditor';
-import { Button } from '@/components/ui/button';
 import { Plus, Loader2 } from 'lucide-react';
 import { Project, getProjects, createProject, updateProject, deleteProject, uploadProjectImage } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import ProjectEditor from '@/components/admin/ProjectEditor';
 
 const AdminProjects: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);

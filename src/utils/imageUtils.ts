@@ -17,7 +17,8 @@ export const resizeImage = async (
   file: File,
   maxWidth: number,
   maxHeight: number,
-  keepAspectRatio = true
+  keepAspectRatio = true,
+  format: 'webp' | 'jpeg' | 'png' = 'webp'
 ): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const img = document.createElement('img');
@@ -52,6 +53,18 @@ export const resizeImage = async (
 
         ctx.drawImage(img, 0, 0, width, height);
 
+        // Format'a göre mime type belirle
+        let mimeType = 'image/webp';
+        let quality = 0.85; // WebP için daha yüksek kalite
+
+        if (format === 'jpeg') {
+          mimeType = 'image/jpeg';
+          quality = 0.9;
+        } else if (format === 'png') {
+          mimeType = 'image/png';
+          quality = 0.9;
+        }
+
         canvas.toBlob(
           (blob) => {
             if (blob) {
@@ -60,8 +73,8 @@ export const resizeImage = async (
               reject(new Error('Resim dönüştürülemedi'));
             }
           },
-          file.type,
-          0.9 // 90% kalite
+          mimeType,
+          quality
         );
       } catch (error) {
         reject(error);
@@ -76,15 +89,31 @@ export const resizeImage = async (
   });
 };
 
-export const uploadImage = async (file: File, bucket: string = 'blog-images') => {
+export const uploadImage = async (
+  file: File, 
+  bucket: string = 'blog-images',
+  format: 'webp' | 'jpeg' | 'png' = 'webp'
+) => {
   try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+    // Resmi optimize et ve WebP formatına çevir
+    const optimizedBlob = await resizeImage(
+      file, 
+      IMAGE_SIZES.cover.width, 
+      IMAGE_SIZES.cover.height, 
+      true, 
+      format
+    );
+
+    // Dosya adını oluştur
+    const fileName = `${Math.random().toString(36).substring(2)}.${format}`;
     const filePath = `${fileName}`;
 
+    // Optimize edilmiş resmi yükle
     const { error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(filePath, file);
+      .upload(filePath, optimizedBlob, {
+        contentType: `image/${format}`
+      });
 
     if (uploadError) {
       throw uploadError;

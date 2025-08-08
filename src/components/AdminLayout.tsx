@@ -113,7 +113,7 @@ const AdminLayout = () => {
           <ul className="space-y-2">
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1" 
+                to={ADMIN_URLS.DASHBOARD}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Home size={18} />
@@ -122,7 +122,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1/profile" 
+                to={`${ADMIN_URLS.DASHBOARD}/profile`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <User size={18} />
@@ -131,7 +131,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1/about" 
+                to={`${ADMIN_URLS.DASHBOARD}/about`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Info size={18} />
@@ -140,7 +140,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1/blog" 
+                to={`${ADMIN_URLS.DASHBOARD}/blog`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <FileText size={18} />
@@ -149,7 +149,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1/projects" 
+                to={`${ADMIN_URLS.DASHBOARD}/projects`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Briefcase size={18} />
@@ -158,7 +158,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1/messages" 
+                to={`${ADMIN_URLS.DASHBOARD}/messages`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <MessageSquare size={18} />
@@ -167,7 +167,7 @@ const AdminLayout = () => {
             </li>
             <li>
               <Link 
-                to="/__q7r5t9m2v4b1/contact" 
+                to={`${ADMIN_URLS.DASHBOARD}/contact`}
                 className="flex items-center gap-2 p-2 hover:bg-zinc-800 rounded-md transition-colors"
               >
                 <Phone size={18} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,9 @@ import { Mail, Github, Linkedin, Twitter, MapPin, Clock, X } from 'lucide-react'
 import { supabase } from '../lib/supabase';
 import { useProfile } from '../lib/hooks/useProfile';
 import { useContactInfo } from '../lib/hooks/useContactInfo';
+
+// Mobil kontrolü için yardımcı fonksiyon
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 
 const contactSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -25,6 +28,7 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 const Contact: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [mobile, setMobile] = useState(false);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -33,9 +37,62 @@ const Contact: React.FC = () => {
   const { profile, loading: profileLoading } = useProfile();
   const { contactInfo, loading: contactInfoLoading } = useContactInfo();
 
+  // Mobil kontrolü
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setMobile(isMobile());
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
   });
+
+  // Mobilde animasyonları kapat
+  const animationProps = useMemo(() => {
+    if (mobile) {
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        transition: { duration: 0 }
+      };
+    }
+    return {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.8 }
+    };
+  }, [mobile]);
+
+  const headerAnimation = useMemo(() => {
+    if (mobile) {
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        transition: { duration: 0 }
+      };
+    }
+    return {
+      initial: { opacity: 0, y: -20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.8 }
+    };
+  }, [mobile]);
+
+  const buttonAnimation = useMemo(() => {
+    if (mobile) {
+      return {};
+    }
+    return {
+      whileHover: { scale: 1.05 },
+      whileTap: { scale: 0.95 }
+    };
+  }, [mobile]);
 
   const onSubmit = async (data: ContactFormValues) => {
     setLoading(true);
@@ -118,9 +175,7 @@ const Contact: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          {...headerAnimation}
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
@@ -134,9 +189,8 @@ const Contact: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            {...animationProps}
+            transition={{ ...animationProps.transition, delay: 0.2 }}
             className="space-y-8"
           >
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
@@ -147,9 +201,8 @@ const Contact: React.FC = () => {
                 {contactInfoItems.map((item, index) => (
                   <motion.div
                     key={item.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 + (index * 0.1) }}
+                    {...animationProps}
+                    transition={{ ...animationProps.transition, delay: 0.4 + (index * 0.1) }}
                     className="flex items-center space-x-4"
                   >
                     <div className="flex-shrink-0 w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
@@ -174,29 +227,29 @@ const Contact: React.FC = () => {
             </div>
 
             {/* Social Links */}
-            <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
-              <h2 className="text-2xl font-semibold text-white mb-6">
-                Follow Me
-              </h2>
-              <div className="flex space-x-4">
-                {socialLinks.map((social, index) => (
-                  <motion.a
-                    key={social.name}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.6 + (index * 0.1) }}
-                    className={`w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 ${social.color} transition-all duration-300 hover:bg-gray-700`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <social.icon size={20} />
-                  </motion.a>
-                ))}
+            {socialLinks.length > 0 && (
+              <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
+                <h2 className="text-2xl font-semibold text-white mb-6">
+                  Follow Me
+                </h2>
+                <div className="flex space-x-4">
+                  {socialLinks.map((link, index) => (
+                    <motion.a
+                      key={link.name}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      {...buttonAnimation}
+                      {...animationProps}
+                      transition={{ ...animationProps.transition, delay: 0.6 + (index * 0.1) }}
+                      className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                    >
+                      <link.icon size={20} />
+                    </motion.a>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Availability */}
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
@@ -215,14 +268,12 @@ const Contact: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Contact Form Alternative / Message */}
+          {/* Contact Form */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="space-y-8"
+            {...animationProps}
+            transition={{ ...animationProps.transition, delay: 0.4 }}
+            className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800"
           >
-            <div className="bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-800">
               <h2 className="text-2xl font-semibold text-white mb-6">
                 Let's Build Something Amazing
               </h2>
@@ -269,8 +320,7 @@ const Contact: React.FC = () => {
                   </motion.button>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
         </div>
       </div>
 

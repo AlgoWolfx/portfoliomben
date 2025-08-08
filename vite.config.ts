@@ -19,15 +19,18 @@ export default defineConfig({
         // Console.log'ları kaldır
         manualChunks: {
           // Vendor chunk'ları ayır
-          vendor: ['react', 'react-dom'],
-          // UI kütüphaneleri
-          ui: ['framer-motion', 'lucide-react', '@radix-ui/react-icons'],
+          'react-vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          // UI kütüphaneleri - daha agresif splitting
+          'framer-motion': ['framer-motion'],
+          'lucide-icons': ['lucide-react'],
+          'radix-ui': ['@radix-ui/react-icons', '@radix-ui/react-slot'],
           // Form kütüphaneleri
-          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-          // Editor kütüphaneleri
-          editor: ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-color', '@tiptap/extension-heading', '@tiptap/extension-highlight', '@tiptap/extension-image', '@tiptap/extension-link', '@tiptap/extension-placeholder', '@tiptap/extension-text-align', '@tiptap/extension-text-style', '@tiptap/extension-underline'],
+          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
           // Supabase
-          supabase: ['@supabase/supabase-js'],
+          'supabase': ['@supabase/supabase-js'],
+          // Diğer kütüphaneler
+          'utils': ['clsx', 'class-variance-authority', 'tailwind-merge'],
         },
       },
     },
@@ -48,7 +51,17 @@ export default defineConfig({
   },
   // Mobil optimizasyonları
   optimizeDeps: {
-    include: ['react', 'react-dom', 'framer-motion', 'lucide-react'],
+    include: [
+      'react', 
+      'react-dom', 
+      'framer-motion', 
+      'lucide-react',
+      '@radix-ui/react-icons'
+    ],
+    // Lucide React için tree shaking
+    esbuildOptions: {
+      treeShaking: true,
+    },
   },
   // Server optimizasyonları
   server: {

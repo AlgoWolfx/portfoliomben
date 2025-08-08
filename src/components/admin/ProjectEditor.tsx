@@ -1,120 +1,44 @@
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
-import Placeholder from '@tiptap/extension-placeholder';
-import { Button } from '@/components/ui/button';
-import { 
-  Bold, 
-  Italic, 
-  Link as LinkIcon, 
-  Image as ImageIcon,
-  List,
-  ListOrdered,
-  Heading
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface ProjectEditorProps {
   content: string;
   onChange: (content: string) => void;
+  placeholder?: string;
 }
 
-const ProjectEditor = ({ content, onChange }: ProjectEditorProps) => {
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Image,
-      Link.configure({
-        openOnClick: false,
-      }),
-      Placeholder.configure({
-        placeholder: 'Proje açıklamasını buraya yazın...',
-      }),
-    ],
-    content: content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-  });
+const ProjectEditor = ({ content, onChange, placeholder = 'Proje açıklamasını buraya yazın...' }: ProjectEditorProps) => {
+  const [markdownContent, setMarkdownContent] = useState(content);
 
-  if (!editor) {
-    return null;
-  }
+  useEffect(() => {
+    setMarkdownContent(content);
+  }, [content]);
 
-  const addImage = () => {
-    const url = window.prompt('Resim URL\'i girin:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
-  };
-
-  const addLink = () => {
-    const url = window.prompt('Link URL\'i girin:');
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    setMarkdownContent(newContent);
+    onChange(newContent);
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-gray-900">
-      <div className="flex gap-2 mb-4 flex-wrap border-b border-gray-700 pb-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'bg-gray-700' : ''}
-        >
-          <Heading size={20} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-gray-700' : ''}
-        >
-          <Bold size={20} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-gray-700' : ''}
-        >
-          <Italic size={20} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'bg-gray-700' : ''}
-        >
-          <List size={20} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'bg-gray-700' : ''}
-        >
-          <ListOrdered size={20} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={addLink}
-          className={editor.isActive('link') ? 'bg-gray-700' : ''}
-        >
-          <LinkIcon size={20} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={addImage}
-        >
-          <ImageIcon size={20} />
-        </Button>
+    <div className="border border-zinc-700 rounded-md">
+      <textarea
+        value={markdownContent}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className="w-full h-64 p-4 bg-zinc-800 border-0 text-white font-mono text-sm resize-none focus:outline-none focus:ring-0"
+        style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
+      />
+      <div className="p-4 bg-zinc-900 border-t border-zinc-700 text-xs text-zinc-400">
+        <p className="mb-2">Markdown desteği:</p>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <span>**kalın** = <strong>kalın</strong></span>
+          <span>*italik* = <em>italik</em></span>
+          <span># Başlık 1</span>
+          <span>## Başlık 2</span>
+          <span>- Liste öğesi</span>
+          <span>1. Numaralı liste</span>
+        </div>
       </div>
-      <EditorContent editor={editor} className="prose prose-invert max-w-none" />
     </div>
   );
 };

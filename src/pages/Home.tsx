@@ -41,9 +41,9 @@ const Home = () => {
     };
     
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkMobile, { passive: true } as AddEventListenerOptions);
     
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile as EventListener);
   }, []);
 
   useEffect(() => {
@@ -175,6 +175,8 @@ const Home = () => {
                   width="128"
                   height="128"
                   loading="lazy"
+                  decoding="async"
+                  fetchpriority="low"
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     // Fallback olarak orijinal URL'i kullan
