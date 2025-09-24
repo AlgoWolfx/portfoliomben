@@ -13,6 +13,17 @@ const AdminMetaTags = ({
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      {/* Admin sayfaları için favicon'u data URL ile ayarla (ağ isteğini kes) */}
+      <link
+        rel="icon"
+        type="image/png"
+        href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO93+N0AAAAASUVORK5CYII="
+      />
+      <link
+        rel="shortcut icon"
+        type="image/png"
+        href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO93+N0AAAAASUVORK5CYII="
+      />
       
       {/* SEO indekslemesini engelleme */}
       <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />

@@ -1,42 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
-import { getCurrentUser, signOut } from '../lib/supabase';
+import { signOut } from '../lib/supabase';
 import { LogOut, Home, User, FileText, Briefcase, MessageSquare, Info, Phone } from 'lucide-react';
 import { checkSessionTimeout, updateLastActivity, secureLogout } from '../lib/security';
 import AdminMetaTags from './AdminMetaTags';
 import { ADMIN_URLS } from '../lib/constants';
 
 const AdminLayout = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
   const navigate = useNavigate();
 
+  // ProtectedRoute zaten auth kontrolü yapıyor; burada sadece aktiviteyi güncel tut.
   useEffect(() => {
-    const checkAuth = async () => {
-      setLoading(true);
-      
-      // Session timeout kontrolü
-      if (checkSessionTimeout()) {
-        await secureLogout();
-        navigate(ADMIN_URLS.LOGIN);
-        return;
-      }
-
-      const { data, error } = await getCurrentUser();
-      
-      if (error || !data.user) {
-        navigate(ADMIN_URLS.LOGIN);
-        return;
-      }
-      
-      // Son aktivite zamanını güncelle
-      updateLastActivity();
-      
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, [navigate]);
+    updateLastActivity();
+  }, []);
 
   // Session timeout kontrolü - her 5 dakikada bir kontrol et
   useEffect(() => {

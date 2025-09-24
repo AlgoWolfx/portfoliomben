@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn, getSession } from '../../lib/supabase';
+import { signIn } from '../../lib/supabase';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { adminLoginSchema } from '../../utils/validation';
-import { useRateLimit } from '../../hooks/useRateLimit';
-import { updateLastActivity, getSafeErrorMessage } from '../../lib/security';
+import { sanitizeForSQL } from '../../utils/validation';
 import AdminMetaTags from '../../components/AdminMetaTags';
 import { ADMIN_URLS } from '../../lib/constants';
 
@@ -19,16 +16,10 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { 
-    canAttempt, 
-    remainingAttempts, 
-    recordFailedAttempt, 
-    recordSuccessfulAttempt,
-    getFormattedRemainingTime 
-  } = useRateLimit();
-
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
-    resolver: zodResolver(adminLoginSchema),
+    // Sadece submit/blur doğrulaması; ekstra güvenlik katmanlarını kullanma
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
     defaultValues: {
       email: '',
       password: '',
@@ -36,52 +27,26 @@ const AdminLogin = () => {
     },
   });
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await getSession();
-      if (data.session) {
-        navigate(ADMIN_URLS.DASHBOARD);
-      }
-    };
-
-    checkSession();
-  }, [navigate]);
+  // Oturum kontrolü için otomatik yönlendirmeyi kaldırdık.
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Rate limiting kontrolü
-    if (!canAttempt) {
-      setError(`Çok fazla başarısız deneme. ${getFormattedRemainingTime()} sonra tekrar deneyin.`);
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
+      // Sadece SQL enjeksiyonu için temel temizleme (client-side)
+      const email = sanitizeForSQL(data.email);
+      const password = data.password; // Parolayı değiştirmeyelim
 
-
-      const { error } = await signIn(data.email, data.password);
+      const { error } = await signIn(email, password);
       
       if (error) {
-        recordFailedAttempt();
-        
-
-        
-        setError(`Giriş başarısız. E-posta veya şifre hatalı. Kalan deneme: ${remainingAttempts - 1}`);
+        setError('Giriş başarısız. E-posta veya şifre hatalı.');
       } else {
-        recordSuccessfulAttempt();
-        updateLastActivity();
-        
-
-        
-        navigate(ADMIN_URLS.DASHBOARD);
+        navigate(ADMIN_URLS.DASHBOARD, { replace: true });
       }
           } catch (err) {
-        recordFailedAttempt();
-        
-
-        
-        setError(getSafeErrorMessage(err));
+        setError('Bir hata oluştu. Lütfen tekrar deneyin.');
       } finally {
       setLoading(false);
     }
@@ -90,8 +55,8 @@ const AdminLogin = () => {
   return (
     <>
       <AdminMetaTags title="Admin Girişi" description="Site yönetimi girişi" />
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-full max-w-md p-6 bg-zinc-900 rounded-lg border border-zinc-800">
+      <div className="min-h-screen bg-black flex items-center justify-center relative z-10">
+        <div className="w-full max-w-md p-6 bg-zinc-900 rounded-lg border border-zinc-800 relative z-10" onClick={(e) => e.stopPropagation()}>
           <h1 className="text-2xl font-bold text-white mb-6 text-center">Admin Girişi</h1>
         
         {error && (
@@ -109,7 +74,9 @@ const AdminLogin = () => {
               id="email"
               type="email"
               {...register('email')}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              autoFocus
+              autoComplete="email"
+              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500 pointer-events-auto"
             />
             {errors.email && (
               <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
@@ -124,7 +91,8 @@ const AdminLogin = () => {
               id="password"
               type="password"
               {...register('password')}
-              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              autoComplete="current-password"
+              className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-blue-500 pointer-events-auto"
             />
             {errors.password && (
               <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
@@ -145,19 +113,13 @@ const AdminLogin = () => {
           
           <button
             type="submit"
-            disabled={loading || !canAttempt}
+            disabled={loading}
             className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Giriş yapılıyor...' : !canAttempt ? `Bekleyin (${getFormattedRemainingTime()})` : 'Giriş Yap'}
+            {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
           </button>
         </form>
-        
-        {/* Rate limiting bilgisi */}
-        {remainingAttempts < 5 && (
-          <div className="mt-4 p-3 bg-yellow-900/50 border border-yellow-700 text-yellow-200 rounded-md text-sm">
-            Kalan deneme hakkı: {remainingAttempts}
-          </div>
-        )}
+
       </div>
     </div>
     </>
