@@ -64,7 +64,7 @@ src/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/GeraltXeth/portfoliomben.git
+   git clone https://github.com/AlgoWolfx/portfoliomben.git
    cd portfoliomben
    ```
 
@@ -172,8 +172,8 @@ This project is licensed under the MIT License.
 
 ## 📞 Contact
 
-- **GitHub**: [@GeraltXeth](https://github.com/GeraltXeth)
-- **Portfolio**: [Live Site](https://your-domain.vercel.app)
+- **GitHub**: [@AlgoWolfx](https://github.com/AlgoWolfx)
+- **Portfolio**: [Live Site](https://algowolf.vercel.app)
 
 ---
 
